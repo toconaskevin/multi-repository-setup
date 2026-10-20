@@ -1,0 +1,44 @@
+name: litch
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: plan, apply, or drift
+        required: true
+        default: plan
+      config:
+        description: One config path. Empty runs every file in configs/.
+        required: false
+        default: ""
+      templates:
+        description: Directory of workflow templates
+        required: false
+        default: templates
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - configs/single-app.yaml
+          - configs/multi-app.yaml
+          - configs/custom.yaml
+    steps:
+      - uses: actions/checkout@v7
+      - if: inputs.config == '' || inputs.config == matrix.config
+        uses: toconaskevin/litch@main
+        with:
+          command: ${{ inputs.command }}
+          config: ${{ inputs.config != '' && inputs.config || matrix.config }}
+          kinds: kinds
+          templates: ${{ inputs.templates }}
+        env:
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          AZURE_KEY_VAULT_URL: ${{ vars.AZURE_KEY_VAULT_URL }}
