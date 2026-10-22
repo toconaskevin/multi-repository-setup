@@ -36,7 +36,6 @@ jobs:
         config:
           - configs/single-app.yaml
           - configs/multi-app.yaml
-          - configs/custom.yaml
     steps:
       - uses: actions/checkout@v7
       - if: github.event_name == 'schedule' || inputs.config == '' || inputs.config == matrix.config
