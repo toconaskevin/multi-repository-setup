@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - if: inputs.config == '' || inputs.config == matrix.config
-        uses: toconaskevin/litch@2a42bd952c3195e8e9283bfd2728774abff529ca
+        uses: toconaskevin/litch@c71210eaeebb471a94a12cd1ca5ecd8292f1a2ba
         with:
           command: ${{ inputs.command }}
           config: ${{ inputs.config != '' && inputs.config || matrix.config }}
