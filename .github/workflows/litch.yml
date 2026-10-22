@@ -1,10 +1,18 @@
 name: litch
 on:
+  schedule:
+    # Daily drift check on the default branch (UTC).
+    - cron: "0 6 * * *"
   workflow_dispatch:
     inputs:
       command:
         description: plan, apply, or drift
         required: true
+        type: choice
+        options:
+          - plan
+          - apply
+          - drift
         default: plan
       config:
         description: One config path. Empty runs every file in configs/.
@@ -28,15 +36,16 @@ jobs:
         config:
           - configs/single-app.yaml
           - configs/multi-app.yaml
+          - configs/custom.yaml
     steps:
       - uses: actions/checkout@v7
-      - if: inputs.config == '' || inputs.config == matrix.config
+      - if: github.event_name == 'schedule' || inputs.config == '' || inputs.config == matrix.config
         uses: toconaskevin/litch@main
         with:
-          command: ${{ inputs.command }}
-          config: ${{ inputs.config != '' && inputs.config || matrix.config }}
+          command: ${{ github.event_name == 'schedule' && 'drift' || inputs.command }}
+          config: ${{ (github.event_name == 'schedule' || inputs.config == '') && matrix.config || inputs.config }}
           kinds: kinds
-          templates: ${{ inputs.templates }}
+          templates: ${{ inputs.templates || 'templates' }}
         env:
           AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
